@@ -67,7 +67,7 @@ function convert_frames_to_video(tar_file_path::AbstractString, output_path::Abs
 
     mktempdir() do tmpdir
         run(unpack_cmd(tar_file_path, tmpdir, ".tar", nothing))
-        cmd = `ffmpeg -r $framerate -i %07d.png -vcodec libx264 -preset slow -crf 18`
+        cmd = `ffmpeg -r $framerate -i %07d.png -vcodec libx264 -preset slow -crf 23 -pix_fmt yuv420p`
         if overwrite
             cmd = `$cmd -y`
         end
@@ -77,11 +77,13 @@ function convert_frames_to_video(tar_file_path::AbstractString, output_path::Abs
             try
                 run(cmd)
             catch e
-                println("""
-Could not call `ffmpeg` to convert your frames into a video.
-If you want to convert the frames manually, you can extract the
-.tar archive into a directory, cd to that directory, and run:
-ffmpeg -r 60 -i %07d.png \\\n\t -vcodec libx264 \\\n\t -preset slow \\\n\t -crf 18 \\\n\t output.mp4""")
+                msg = """
+                Could not call `ffmpeg` to convert your frames into a video.
+                If you want to convert the frames manually, you can extract the
+                .tar archive into a directory, cd to that directory, and run:
+                ffmpeg -r 60 -i %07d.png \\\n\t -vcodec libx264 \\\n\t -preset slow \\\n\t -crf 23 \\\n\t -pix_fmt yuv420p \\\n\t output.mp4
+                """
+                println(msg)
                 rethrow(e)
             end
         end
